@@ -73,4 +73,6 @@ for (const name of names) {
   }
 }
 
+ctx.drawImage(canvas, 684, 0, 18, 18, 54, 0, 18, 18)
+
 await canvas.toFile(outPath)
