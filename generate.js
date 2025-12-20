@@ -62,20 +62,32 @@ for (let name of names) {
   const srcW = Math.min(img.width, INNER)
   const srcH = Math.min(img.height, INNER)
 
-  // draw texture + expanded edges into main canvas
-  ctx.drawImage(img, 0, 0, srcW, srcH, dx + BORDER, dy + BORDER, srcW, srcH)
+  function drawImage(img) {
+    ctx.drawImage(img, 0, 0, srcW, srcH, dx + BORDER, dy + BORDER, srcW, srcH)
 
-  ctx.drawImage(img, 0, 0, 1, srcH, dx, dy + BORDER, 1, srcH)
-  ctx.drawImage(img, srcW - 1, 0, 1, srcH, dx + BORDER + srcW, dy + BORDER, 1, srcH)
-  ctx.drawImage(img, 0, 0, srcW, 1, dx + BORDER, dy, srcW, 1)
-  ctx.drawImage(img, 0, srcH - 1, srcW, 1, dx + BORDER, dy + BORDER + srcH, srcW, 1)
+    ctx.drawImage(img, 0, 0, 1, srcH, dx, dy + BORDER, 1, srcH)
+    ctx.drawImage(img, srcW - 1, 0, 1, srcH, dx + BORDER + srcW, dy + BORDER, 1, srcH)
+    ctx.drawImage(img, 0, 0, srcW, 1, dx + BORDER, dy, srcW, 1)
+    ctx.drawImage(img, 0, srcH - 1, srcW, 1, dx + BORDER, dy + BORDER + srcH, srcW, 1)
 
-  ctx.drawImage(img, 0, 0, 1, 1, dx, dy, 1, 1)
-  ctx.drawImage(img, srcW - 1, 0, 1, 1, dx + BORDER + srcW, dy, 1, 1)
-  ctx.drawImage(img, 0, srcH - 1, 1, 1, dx, dy + BORDER + srcH, 1, 1)
-  ctx.drawImage(img, srcW - 1, srcH - 1, 1, 1, dx + BORDER + srcW, dy + BORDER + srcH, 1, 1)
+    ctx.drawImage(img, 0, 0, 1, 1, dx, dy, 1, 1)
+    ctx.drawImage(img, srcW - 1, 0, 1, 1, dx + BORDER + srcW, dy, 1, 1)
+    ctx.drawImage(img, 0, srcH - 1, 1, 1, dx, dy + BORDER + srcH, 1, 1)
+    ctx.drawImage(img, srcW - 1, srcH - 1, 1, 1, dx + BORDER + srcW, dy + BORDER + srcH, 1, 1)
+  }
 
-  // per-texture tint, masked to this 18x18 slot only
+  drawImage(img)
+
+  if (name === "open_eyeblossom") {
+    if (fs.existsSync(`${sourceDir}/block/open_eyeblossom_emissive.png`)) {
+      drawImage(await loadImage(`${sourceDir}/block/open_eyeblossom_emissive.png`))
+    }
+  } else if (name === "firefly_bush") {
+    if (fs.existsSync(`${sourceDir}/block/firefly_bush_emissive.png`)) {
+      drawImage(await loadImage(`${sourceDir}/block/firefly_bush_emissive.png`))
+    }
+  }
+
   if (tints[name]) {
     const maskCanvas = new Canvas(SLOT, SLOT)
     const maskCtx = maskCanvas.getContext("2d")
