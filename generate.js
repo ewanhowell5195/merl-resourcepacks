@@ -4,6 +4,7 @@ import { Canvas, loadImage } from "skia-canvas"
 const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures"
 const mappingPath = "./mapping.json"
 const tintsPath = "./tints.json"
+const leavesPath = "./leaves.json"
 const basePath = "./textures/base.png"
 const outPath = "./textures/vanilla.png"
 
@@ -13,6 +14,7 @@ const BORDER = 1
 
 const names = JSON.parse(await fs.promises.readFile(mappingPath, "utf8"))
 const tints = JSON.parse(await fs.promises.readFile(tintsPath, "utf8"))
+const leaves = JSON.parse(await fs.promises.readFile(leavesPath, "utf8"))
 
 const baseImg = await loadImage(basePath)
 
@@ -100,6 +102,46 @@ for (let name of names) {
     maskCtx.drawImage(canvas, dx, dy, SLOT, SLOT, 0, 0, SLOT, SLOT)
 
     ctx.drawImage(maskCanvas, dx, dy)
+  }
+
+  if (leaves.includes(name)) {
+    const imgData = ctx.getImageData(dx, dy, SLOT, SLOT)
+    const data = imgData.data
+
+    let darkest = null
+    let minBrightness = Infinity
+
+    for (let i = 0; i < data.length; i += 4) {
+      const a = data[i + 3]
+      if (a === 0) continue
+
+      const r = data[i]
+      const g = data[i + 1]
+      const b = data[i + 2]
+
+      const brightness = r + g + b
+      if (brightness < minBrightness) {
+        minBrightness = brightness
+        darkest = [r, g, b]
+      }
+    }
+
+    if (darkest) {
+      const dr = Math.floor(darkest[0] * 0.75)
+      const dg = Math.floor(darkest[1] * 0.75)
+      const db = Math.floor(darkest[2] * 0.75)
+
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] === 0) {
+          data[i] = dr
+          data[i + 1] = dg
+          data[i + 2] = db
+          data[i + 3] = 255
+        }
+      }
+
+      ctx.putImageData(imgData, dx, dy)
+    }
   }
 
   x++
