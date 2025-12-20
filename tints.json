@@ -1,0 +1,20 @@
+{
+  "grass_block_top": "#7CBD6B",
+  "grass_block_side_overlay": "#7CBD6B",
+  "short_grass": "#7CBD6B",
+  "acacia_leaves": "#5BAB46",
+  "dark_oak_leaves": "#5BAB46",
+  "jungle_leaves": "#5BAB46",
+  "mangrove_leaves": "#5BAB46",
+  "oak_leaves": "#5BAB46",
+  "vine": "#5BAB46",
+  "fern": "#7CBD6B",
+  "lily_pad": "#208030",
+  "melon_stem": "#E0C71C",
+  "attached_melon_stem": "#E0C71C",
+  "pumpkin_stem": "#E0C71C",
+  "attached_pumpkin_stem": "#E0C71C",
+  "sugar_cane": "#5BAB46",
+  "tall_grass": "#5BAB46",
+  "large_fern": "#5BAB46"
+}

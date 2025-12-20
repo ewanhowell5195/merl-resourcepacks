@@ -4,6 +4,7 @@ import { Canvas, loadImage } from "skia-canvas"
 
 const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures/block"
 const mappingPath = "./mapping.json"
+const tintsPath = "./tints.json"
 const basePath = "./base.png"
 const outPath = "./test.png"
 
@@ -12,6 +13,8 @@ const INNER = 16
 const BORDER = 1
 
 const names = JSON.parse(await fs.promises.readFile(mappingPath, "utf8"))
+const tints = JSON.parse(await fs.promises.readFile(tintsPath, "utf8"))
+
 const baseImg = await loadImage(basePath)
 
 const canvas = new Canvas(baseImg.width, baseImg.height)
@@ -35,17 +38,8 @@ for (const name of names) {
   const srcW = Math.min(img.width, INNER)
   const srcH = Math.min(img.height, INNER)
 
-  ctx.drawImage(
-    img,
-    0,
-    0,
-    srcW,
-    srcH,
-    dx + BORDER,
-    dy + BORDER,
-    srcW,
-    srcH
-  )
+  // draw texture + expanded edges into main canvas
+  ctx.drawImage(img, 0, 0, srcW, srcH, dx + BORDER, dy + BORDER, srcW, srcH)
 
   ctx.drawImage(img, 0, 0, 1, srcH, dx, dy + BORDER, 1, srcH)
   ctx.drawImage(img, srcW - 1, 0, 1, srcH, dx + BORDER + srcW, dy + BORDER, 1, srcH)
@@ -56,6 +50,21 @@ for (const name of names) {
   ctx.drawImage(img, srcW - 1, 0, 1, 1, dx + BORDER + srcW, dy, 1, 1)
   ctx.drawImage(img, 0, srcH - 1, 1, 1, dx, dy + BORDER + srcH, 1, 1)
   ctx.drawImage(img, srcW - 1, srcH - 1, 1, 1, dx + BORDER + srcW, dy + BORDER + srcH, 1, 1)
+
+  // per-texture tint, masked to this 18x18 slot only
+  if (tints[name]) {
+    const maskCanvas = new Canvas(SLOT, SLOT)
+    const maskCtx = maskCanvas.getContext("2d")
+
+    maskCtx.drawImage(canvas, dx, dy, SLOT, SLOT, 0, 0, SLOT, SLOT)
+    maskCtx.globalCompositeOperation = "multiply"
+    maskCtx.fillStyle = tints[name]
+    maskCtx.fillRect(0, 0, SLOT, SLOT)
+    maskCtx.globalCompositeOperation = "destination-in"
+    maskCtx.drawImage(canvas, dx, dy, SLOT, SLOT, 0, 0, SLOT, SLOT)
+
+    ctx.drawImage(maskCanvas, dx, dy)
+  }
 
   x++
   if (x >= cols) {
