@@ -2,7 +2,7 @@ import fs from "fs"
 import path from "path"
 import { Canvas, loadImage } from "skia-canvas"
 
-const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures/block"
+const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures"
 const mappingPath = "./mapping.json"
 const tintsPath = "./tints.json"
 const basePath = "./base.png"
@@ -27,8 +27,13 @@ const cols = Math.floor(baseImg.width / SLOT)
 let x = 0
 let y = 0
 
-for (const name of names) {
-  const img = await loadImage(path.join(sourceDir, name + ".png"))
+for (let name of names) {
+  let img
+  if (name.includes("/")) {
+    img = await loadImage(path.join(sourceDir, name + ".png"))
+  } else {
+    img = await loadImage(path.join(sourceDir, `block/${name}.png`))
+  }
 
   const dx = x * SLOT
   const dy = y * SLOT

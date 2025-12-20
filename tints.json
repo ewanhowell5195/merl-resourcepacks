@@ -20,5 +20,12 @@
   "redstone_dust_line0": "#FC3100",
   "redstone_dust_line1": "#FC3100",
   "redstone_dust_dot": "#FC3100",
-  "spruce_leaves": "#619961"
+  "spruce_leaves": "#619961",
+  "water_still": "#3F76E4",
+  "water_flow": "#3F76E4",
+  "tall_grass_bottom": "#5BAB46",
+  "tall_grass_top": "#5BAB46",
+  "large_fern_bottom": "#5BAB46",
+  "large_fern_top": "#5BAB46",
+  "birch_leaves": "#80A755"
 }
