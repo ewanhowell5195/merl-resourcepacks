@@ -4,8 +4,8 @@ import { Canvas, loadImage } from "skia-canvas"
 const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures"
 const mappingPath = "./mapping.json"
 const tintsPath = "./tints.json"
-const basePath = "./base.png"
-const outPath = "./test.png"
+const basePath = "./textures/base.png"
+const outPath = "./textures/vanilla.png"
 
 const SLOT = 18
 const INNER = 16
@@ -115,6 +115,7 @@ if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
   const img = await loadImage(`${sourceDir}/entity/chest/normal.png`)
   const canvas2 = new Canvas(img.width, img.height)
   const ctx2 = canvas2.getContext("2d")
+  ctx2.save()
   ctx2.translate(img.width / 2, img.height / 2)
   ctx2.rotate(Math.PI)
   ctx2.drawImage(img, -img.width / 2, -img.height / 2)
@@ -125,14 +126,27 @@ if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
   ctx.drawImage(canvas2, 8, 22, 14, 9, 18 * 27 + 2, 8, 14, 9)
   ctx.drawImage(canvas2, 8, 30, 14, 1, 18 * 27 + 2, 17, 14, 1)
   ctx.drawImage(canvas2, 8, 45, 14, 5, 18 * 27 + 2, 3, 14, 5)
-  ctx.drawImage(canvas2, 58, 59, 5, 5, 18 * 31 + 2, 18 * 7 + 1, 5, 5)
-  ctx.drawImage(canvas2, 58, 59, 5, 1, 18 * 31 + 2, 18 * 7, 5, 1)
+  ctx.drawImage(canvas2, 58, 59, 5, 4, 18 * 31 + 2, 18 * 7 + 2, 5, 4)
+  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 31, 18 * 7 + 2, 1, 4)
+  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 31 + 1, 18 * 7 + 2, 1, 4)
+
+  ctx2.restore()
+  ctx2.clearRect(0, 0, img.width, img.height)
+  ctx2.translate(0, img.height)
+  ctx2.scale(1, -1)
+  ctx2.drawImage(img, 0, 0)
+
+  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 31 + 2, 18 * 7, 2, 1)
+  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 31 + 2, 18 * 7 + 1, 2, 1)
+  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 31 + 4, 18 * 7, 2, 1)
+  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 31 + 4, 18 * 7 + 1, 2, 1)
 }
 
 if (fs.existsSync(`${sourceDir}/entity/chest/ender.png`)) {
   const img = await loadImage(`${sourceDir}/entity/chest/ender.png`)
   const canvas2 = new Canvas(img.width, img.height)
   const ctx2 = canvas2.getContext("2d")
+  ctx2.save()
   ctx2.translate(img.width / 2, img.height / 2)
   ctx2.rotate(Math.PI)
   ctx2.drawImage(img, -img.width / 2, -img.height / 2)
@@ -143,8 +157,20 @@ if (fs.existsSync(`${sourceDir}/entity/chest/ender.png`)) {
   ctx.drawImage(canvas2, 8, 22, 14, 9, 18 * 52 + 2, 18 * 3 + 8, 14, 9)
   ctx.drawImage(canvas2, 8, 30, 14, 1, 18 * 52 + 2, 18 * 3 + 17, 14, 1)
   ctx.drawImage(canvas2, 8, 45, 14, 5, 18 * 52 + 2, 18 * 3 + 3, 14, 5)
-  ctx.drawImage(canvas2, 58, 59, 5, 5, 18 * 49 + 2, 18 * 3 + 1, 5, 5)
-  ctx.drawImage(canvas2, 58, 59, 5, 1, 18 * 49 + 2, 18 * 3, 5, 1)
+  ctx.drawImage(canvas2, 58, 59, 5, 4, 18 * 49 + 2, 18 * 3 + 2, 5, 4)
+  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 49, 18 * 3 + 2, 1, 4)
+  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 49 + 1, 18 * 3 + 2, 1, 4)
+
+  ctx2.restore()
+  ctx2.clearRect(0, 0, img.width, img.height)
+  ctx2.translate(0, img.height)
+  ctx2.scale(1, -1)
+  ctx2.drawImage(img, 0, 0)
+
+  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 49 + 2, 18 * 3, 2, 1)
+  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 49 + 2, 18 * 3 + 1, 2, 1)
+  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 49 + 4, 18 * 3, 2, 1)
+  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 49 + 4, 18 * 3 + 1, 2, 1)
 }
 
 await canvas.toFile(outPath)
