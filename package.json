@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "dependencies": {
     "skia-canvas": "^3.0.8"
   }

@@ -16,5 +16,9 @@
   "attached_pumpkin_stem": "#E0C71C",
   "sugar_cane": "#5BAB46",
   "tall_grass": "#5BAB46",
-  "large_fern": "#5BAB46"
+  "large_fern": "#5BAB46",
+  "redstone_dust_line0": "#FC3100",
+  "redstone_dust_line1": "#FC3100",
+  "redstone_dust_dot": "#FC3100",
+  "spruce_leaves": "#619961"
 }
