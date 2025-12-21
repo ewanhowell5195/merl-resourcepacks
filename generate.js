@@ -2,15 +2,19 @@ import fs from "fs"
 import { Canvas, loadImage } from "skia-canvas"
 
 const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures"
-const mappingPath = "./mapping.json"
-const tintsPath = "./tints.json"
-const leavesPath = "./leaves.json"
-const basePath = "./textures/base.png"
-const outPath = "./textures/vanilla.png"
+const mappingPath = "mappings/base.json"
+const tintsPath = "tints.json"
+const leavesPath = "leaves.json"
+const basePath = "textures/base.png"
+const outPath = "textures/vanilla.png"
 
-const SLOT = 18
-const INNER = 16
-const BORDER = 1
+const BASE = 16
+const SIZE = 16
+
+const m = SIZE / BASE
+
+const SLOT = 18 * m
+const BORDER = 1 * m
 
 const names = JSON.parse(await fs.promises.readFile(mappingPath, "utf8"))
 const tints = JSON.parse(await fs.promises.readFile(tintsPath, "utf8"))
@@ -18,15 +22,24 @@ const leaves = JSON.parse(await fs.promises.readFile(leavesPath, "utf8"))
 
 const baseImg = await loadImage(basePath)
 
-const canvas = new Canvas(baseImg.width, baseImg.height)
+const canvas = new Canvas(baseImg.width * m, baseImg.height * m)
 const ctx = canvas.getContext("2d")
 
-ctx.drawImage(baseImg, 0, 0)
+ctx.imageSmoothingEnabled = false
+ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height)
 
-const cols = Math.floor(baseImg.width / SLOT)
+const cols = Math.floor(canvas.width / SLOT)
 
 let x = 0
 let y = 0
+
+const debugImg = await loadImage("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABuUlEQVR42pXRwUuTARzG8Yf3Hyh1spBFobvYpZYngzLAyFvU685ZVBf1klRAuHU0Kkgg5k5Zl5oBCTJBRRVQAXUoKIpuorABe2FzRxF9eeT58QJehfHZ5fc+X15egLzcD0Cdr78GyrAZMaNmmxk3STo3D1hXQ9RnCLhFhu0iAnSQUbtrA5Jk3K6BI2gjTwD3fPnowl6/mTYZWHAezqvQtctQFXFfhTdWSFphzAp2XSH3gBq0N0UAL7flgC+/UU6aDNwxp52enyr0Z9lQQXKT1zykfV4H5q1g12VyywrZoPAhpY3P/+XvdbnsX9zeMMfNEedTUoXh7yqM/WXYw9oKI0VQzxTJVcAjM1YYDgrpd1oaH5Ibo5KL5tmS5C9zyHzvjD5XYbKPoQq2EiowRZTynJ1DocSzESskgCrZFxRmXO3t9Ei+Nb9k5cRXeTog+cLsdhY6VNh7rO9Al/DW+CqjwmBChT+vkSvztNveoSso7Mdstd3sTEm3V/a68kenPGmXvOsc3lCBLUQ1w9ZBlHOMuSgWeP8B8iU+iyHn8WMr/lV53BIUeIWy/qlsvCObmmVzk7zdKJ/Uy9rVc6GBZfJIb3EsAAAAAElFTkSuQmCC")
+const debug = new Canvas(SIZE, SIZE)
+const debugCtx = debug.getContext("2d")
+debugCtx.imageSmoothingEnabled = false
+debugCtx.drawImage(debugImg, 0, 0, SIZE, SIZE)
+
+const blank = new Canvas(SIZE, SIZE)
 
 for (let name of names) {
   let texturePath
@@ -36,7 +49,7 @@ for (let name of names) {
     texturePath = `${sourceDir}/block/${name}.png`
   }
 
-  if (!fs.existsSync(texturePath)) {
+  if (name !== "debug" && !fs.existsSync(texturePath)) {
     x++
     if (x >= cols) {
       x = 0
@@ -51,8 +64,11 @@ for (let name of names) {
     name === "entity/chest/normal" ||
     name === "entity/chest/ender"
   ) {
-    img = new Canvas(16, 16)
+    img = blank
+  } else if (name === "debug") {
+    img = blank
   } else {
+    img = blank
     img = await loadImage(texturePath)
   }
 
@@ -61,21 +77,11 @@ for (let name of names) {
 
   ctx.clearRect(dx, dy, SLOT, SLOT)
 
-  const srcW = Math.min(img.width, INNER)
-  const srcH = Math.min(img.height, INNER)
+  const srcW = Math.min(img.width, SIZE)
+  const srcH = Math.min(img.height, SIZE)
 
   function drawImage(img) {
     ctx.drawImage(img, 0, 0, srcW, srcH, dx + BORDER, dy + BORDER, srcW, srcH)
-
-    ctx.drawImage(img, 0, 0, 1, srcH, dx, dy + BORDER, 1, srcH)
-    ctx.drawImage(img, srcW - 1, 0, 1, srcH, dx + BORDER + srcW, dy + BORDER, 1, srcH)
-    ctx.drawImage(img, 0, 0, srcW, 1, dx + BORDER, dy, srcW, 1)
-    ctx.drawImage(img, 0, srcH - 1, srcW, 1, dx + BORDER, dy + BORDER + srcH, srcW, 1)
-
-    ctx.drawImage(img, 0, 0, 1, 1, dx, dy, 1, 1)
-    ctx.drawImage(img, srcW - 1, 0, 1, 1, dx + BORDER + srcW, dy, 1, 1)
-    ctx.drawImage(img, 0, srcH - 1, 1, 1, dx, dy + BORDER + srcH, 1, 1)
-    ctx.drawImage(img, srcW - 1, srcH - 1, 1, 1, dx + BORDER + srcW, dy + BORDER + srcH, 1, 1)
   }
 
   drawImage(img)
@@ -151,7 +157,7 @@ for (let name of names) {
   }
 }
 
-ctx.drawImage(canvas, 18 * 38, 0, 18, 18, 18 * 3, 0, 18, 18)
+ctx.drawImage(canvas, 18 * 38 * m, 0 * m, 18 * m, 18 * m, 18 * 3 * m, 0 * m, 18 * m, 18 * m)
 
 if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
   const img = await loadImage(`${sourceDir}/entity/chest/normal.png`)
@@ -161,16 +167,13 @@ if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
   ctx2.translate(img.width / 2, img.height / 2)
   ctx2.rotate(Math.PI)
   ctx2.drawImage(img, -img.width / 2, -img.height / 2)
-  ctx.drawImage(canvas2, 22, 50, 14, 14, 18 * 25 + 2, 2, 14, 14)
-  ctx.drawImage(canvas2, 22, 22, 14, 9, 18 * 26 + 2, 8, 14, 9)
-  ctx.drawImage(canvas2, 22, 30, 14, 1, 18 * 26 + 2, 17, 14, 1)
-  ctx.drawImage(canvas2, 22, 45, 14, 5, 18 * 26 + 2, 3, 14, 5)
-  ctx.drawImage(canvas2, 8, 22, 14, 9, 18 * 27 + 2, 8, 14, 9)
-  ctx.drawImage(canvas2, 8, 30, 14, 1, 18 * 27 + 2, 17, 14, 1)
-  ctx.drawImage(canvas2, 8, 45, 14, 5, 18 * 27 + 2, 3, 14, 5)
-  ctx.drawImage(canvas2, 58, 59, 5, 4, 18 * 31 + 2, 18 * 7 + 2, 5, 4)
-  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 31, 18 * 7 + 2, 1, 4)
-  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 31 + 1, 18 * 7 + 2, 1, 4)
+  ctx.drawImage(canvas2, 22 * m, 50 * m, 14 * m, 14 * m, (18 * 25 + 2) * m, 2 * m, 14 * m, 14 * m)
+  ctx.drawImage(canvas2, 22 * m, 22 * m, 14 * m, 9 * m, (18 * 26 + 2) * m, 8 * m, 14 * m, 9 * m)
+  ctx.drawImage(canvas2, 22 * m, 45 * m, 14 * m, 5 * m, (18 * 26 + 2) * m, 3 * m, 14 * m, 5 * m)
+  ctx.drawImage(canvas2, 8 * m, 22 * m, 14 * m, 9 * m, (18 * 27 + 2) * m, 8 * m, 14 * m, 9 * m)
+  ctx.drawImage(canvas2, 8 * m, 45 * m, 14 * m, 5 * m, (18 * 27 + 2) * m, 3 * m, 14 * m, 5 * m)
+  ctx.drawImage(canvas2, 58 * m, 59 * m, 5 * m, 4 * m, (18 * 31 + 2) * m, (18 * 7 + 2) * m, 5 * m, 4 * m)
+  ctx.drawImage(canvas2, 63 * m, 59 * m, 1 * m, 4 * m, (18 * 31 + 1) * m, (18 * 7 + 2) * m, 1 * m, 4 * m)
 
   ctx2.restore()
   ctx2.clearRect(0, 0, img.width, img.height)
@@ -178,10 +181,8 @@ if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
   ctx2.scale(1, -1)
   ctx2.drawImage(img, 0, 0)
 
-  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 31 + 2, 18 * 7, 2, 1)
-  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 31 + 2, 18 * 7 + 1, 2, 1)
-  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 31 + 4, 18 * 7, 2, 1)
-  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 31 + 4, 18 * 7 + 1, 2, 1)
+  ctx.drawImage(canvas2, 3 * m, 63 * m, 2 * m, 1 * m, (18 * 31 + 2) * m, (18 * 7 + 1) * m, 2 * m, 1 * m)
+  ctx.drawImage(canvas2, 1 * m, 63 * m, 2 * m, 1 * m, (18 * 31 + 4) * m, (18 * 7 + 1) * m, 2 * m, 1 * m)
 }
 
 if (fs.existsSync(`${sourceDir}/entity/chest/ender.png`)) {
@@ -192,16 +193,13 @@ if (fs.existsSync(`${sourceDir}/entity/chest/ender.png`)) {
   ctx2.translate(img.width / 2, img.height / 2)
   ctx2.rotate(Math.PI)
   ctx2.drawImage(img, -img.width / 2, -img.height / 2)
-  ctx.drawImage(canvas2, 22, 50, 14, 14, 18 * 50 + 2, 18 * 3 + 2, 14, 14)
-  ctx.drawImage(canvas2, 22, 22, 14, 9, 18 * 51 + 2, 18 * 3 + 8, 14, 9)
-  ctx.drawImage(canvas2, 22, 30, 14, 1, 18 * 51 + 2, 18 * 3 + 17, 14, 1)
-  ctx.drawImage(canvas2, 22, 45, 14, 5, 18 * 51 + 2, 18 * 3 + 3, 14, 5)
-  ctx.drawImage(canvas2, 8, 22, 14, 9, 18 * 52 + 2, 18 * 3 + 8, 14, 9)
-  ctx.drawImage(canvas2, 8, 30, 14, 1, 18 * 52 + 2, 18 * 3 + 17, 14, 1)
-  ctx.drawImage(canvas2, 8, 45, 14, 5, 18 * 52 + 2, 18 * 3 + 3, 14, 5)
-  ctx.drawImage(canvas2, 58, 59, 5, 4, 18 * 49 + 2, 18 * 3 + 2, 5, 4)
-  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 49, 18 * 3 + 2, 1, 4)
-  ctx.drawImage(canvas2, 63, 59, 1, 4, 18 * 49 + 1, 18 * 3 + 2, 1, 4)
+  ctx.drawImage(canvas2, 22 * m, 50 * m, 14 * m, 14 * m, (18 * 50 + 2) * m, (18 * 3 + 2) * m, 14 * m, 14 * m)
+  ctx.drawImage(canvas2, 22 * m, 22 * m, 14 * m, 9 * m, (18 * 51 + 2) * m, (18 * 3 + 8) * m, 14 * m, 9 * m)
+  ctx.drawImage(canvas2, 22 * m, 45 * m, 14 * m, 5 * m, (18 * 51 + 2) * m, (18 * 3 + 3) * m, 14 * m, 5 * m)
+  ctx.drawImage(canvas2, 8 * m, 22 * m, 14 * m, 9 * m, (18 * 52 + 2) * m, (18 * 3 + 8) * m, 14 * m, 9 * m)
+  ctx.drawImage(canvas2, 8 * m, 45 * m, 14 * m, 5 * m, (18 * 52 + 2) * m, (18 * 3 + 3) * m, 14 * m, 5 * m)
+  ctx.drawImage(canvas2, 58 * m, 59 * m, 5 * m, 4 * m, (18 * 49 + 2) * m, (18 * 3 + 2) * m, 5 * m, 4 * m)
+  ctx.drawImage(canvas2, 63 * m, 59 * m, 1 * m, 4 * m, (18 * 49 + 1) * m, (18 * 3 + 2) * m, 1 * m, 4 * m)
 
   ctx2.restore()
   ctx2.clearRect(0, 0, img.width, img.height)
@@ -209,10 +207,87 @@ if (fs.existsSync(`${sourceDir}/entity/chest/ender.png`)) {
   ctx2.scale(1, -1)
   ctx2.drawImage(img, 0, 0)
 
-  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 49 + 2, 18 * 3, 2, 1)
-  ctx.drawImage(canvas2, 3, 63, 2, 1, 18 * 49 + 2, 18 * 3 + 1, 2, 1)
-  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 49 + 4, 18 * 3, 2, 1)
-  ctx.drawImage(canvas2, 1, 63, 2, 1, 18 * 49 + 4, 18 * 3 + 1, 2, 1)
+  ctx.drawImage(canvas2, 3 * m, 63 * m, 2 * m, 1 * m, (18 * 49 + 2) * m, (18 * 3 + 1) * m, 2 * m, 1 * m)
+  ctx.drawImage(canvas2, 1 * m, 63 * m, 2 * m, 1 * m, (18 * 49 + 4) * m, (18 * 3 + 1) * m, 2 * m, 1 * m)
 }
+
+const full = ctx.getImageData(0, 0, canvas.width, canvas.height)
+const data = full.data
+const stride = canvas.width * 4
+
+x = 0
+y = 0
+
+for (let name of names) {
+  const dx = x * SLOT
+  const dy = y * SLOT
+
+  const innerX = dx + BORDER
+  const innerY = dy + BORDER
+
+  // clear border
+  for (let i = 0; i < SLOT; i++) {
+    // top
+    data.fill(0, (dy * canvas.width + dx + i) * 4, (dy * canvas.width + dx + i) * 4 + 4)
+    // bottom
+    data.fill(0, ((dy + SLOT - 1) * canvas.width + dx + i) * 4, ((dy + SLOT - 1) * canvas.width + dx + i) * 4 + 4)
+    // left
+    data.fill(0, ((dy + i) * canvas.width + dx) * 4, ((dy + i) * canvas.width + dx) * 4 + 4)
+    // right
+    data.fill(0, ((dy + i) * canvas.width + dx + SLOT - 1) * 4, ((dy + i) * canvas.width + dx + SLOT - 1) * 4 + 4)
+  }
+
+  // borders from inner pixels
+  for (let y2 = 0; y2 < SIZE; y2++) {
+    const srcRow = ((innerY + y2) * canvas.width + innerX) * 4
+    const dstRow = ((dy + BORDER + y2) * canvas.width) * 4
+
+    const left = data.subarray(srcRow, srcRow + 4)
+    const right = data.subarray(srcRow + (SIZE - 1) * 4, srcRow + SIZE * 4)
+
+    for (let b = 0; b < BORDER; b++) {
+      data.set(left, dstRow + (dx + b) * 4)
+      data.set(right, dstRow + (dx + BORDER + SIZE + b) * 4)
+    }
+  }
+
+  for (let x2 = 0; x2 < SIZE; x2++) {
+    const top = data.subarray(
+      ((innerY) * canvas.width + innerX + x2) * 4,
+      ((innerY) * canvas.width + innerX + x2) * 4 + 4
+    )
+    const bottom = data.subarray(
+      ((innerY + SIZE - 1) * canvas.width + innerX + x2) * 4,
+      ((innerY + SIZE - 1) * canvas.width + innerX + x2) * 4 + 4
+    )
+
+    for (let b = 0; b < BORDER; b++) {
+      data.set(top, ((dy + b) * canvas.width + dx + BORDER + x2) * 4)
+      data.set(bottom, ((dy + BORDER + SIZE + b) * canvas.width + dx + BORDER + x2) * 4)
+    }
+  }
+
+  const tl = data.subarray(((innerY) * canvas.width + innerX) * 4, ((innerY) * canvas.width + innerX) * 4 + 4)
+  const tr = data.subarray(((innerY) * canvas.width + innerX + SIZE - 1) * 4, ((innerY) * canvas.width + innerX + SIZE - 1) * 4 + 4)
+  const bl = data.subarray(((innerY + SIZE - 1) * canvas.width + innerX) * 4, ((innerY + SIZE - 1) * canvas.width + innerX) * 4 + 4)
+  const br = data.subarray(((innerY + SIZE - 1) * canvas.width + innerX + SIZE - 1) * 4, ((innerY + SIZE - 1) * canvas.width + innerX + SIZE - 1) * 4 + 4)
+
+  for (let by = 0; by < BORDER; by++) {
+    for (let bx = 0; bx < BORDER; bx++) {
+      data.set(tl, ((dy + by) * canvas.width + dx + bx) * 4)
+      data.set(tr, ((dy + by) * canvas.width + dx + BORDER + SIZE + bx) * 4)
+      data.set(bl, ((dy + BORDER + SIZE + by) * canvas.width + dx + bx) * 4)
+      data.set(br, ((dy + BORDER + SIZE + by) * canvas.width + dx + BORDER + SIZE + bx) * 4)
+    }
+  }
+
+  x++
+  if (x >= cols) {
+    x = 0
+    y++
+  }
+}
+
+ctx.putImageData(full, 0, 0)
 
 await canvas.toFile(outPath)
