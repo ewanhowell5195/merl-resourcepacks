@@ -1,7 +1,7 @@
 import fs from "fs"
 import { Canvas, loadImage } from "skia-canvas"
 
-const configName = "vanilla"
+const configName = "f8thful"
 
 const config = JSON.parse(fs.readFileSync(`config/${configName}.json`))
 
@@ -52,6 +52,18 @@ for (let name of names) {
     continue
   }
 
+  async function loadTexture(path) {
+    let img = await loadImage(path)
+    if (img.width < config.size) {
+      const canvas = new Canvas(config.size, config.size)
+      const ctx = canvas.getContext("2d")
+      ctx.imageSmoothingEnabled = false
+      ctx.drawImage(img, 0, 0, img.width, Math.min(img.height, config.size), 0, 0, config.size, Math.min(img.height, config.size) * (config.size / img.width))
+      img = canvas
+    }
+    return img
+  }
+
   let img
   if (
     name === "air" ||
@@ -62,7 +74,7 @@ for (let name of names) {
   } else if (name === "debug") {
     img = debug
   } else {
-    img = await loadImage(texturePath)
+    img = await loadTexture(texturePath)
   }
 
   const dx = x * SLOT
@@ -81,11 +93,11 @@ for (let name of names) {
 
   if (name === "open_eyeblossom") {
     if (fs.existsSync(`${config.source}/block/open_eyeblossom_emissive.png`)) {
-      drawImage(await loadImage(`${config.source}/block/open_eyeblossom_emissive.png`))
+      drawImage(await loadTexture(`${config.source}/block/open_eyeblossom_emissive.png`))
     }
   } else if (name === "firefly_bush") {
     if (fs.existsSync(`${config.source}/block/firefly_bush_emissive.png`)) {
-      drawImage(await loadImage(`${config.source}/block/firefly_bush_emissive.png`))
+      drawImage(await loadTexture(`${config.source}/block/firefly_bush_emissive.png`))
     }
   }
 
@@ -218,19 +230,13 @@ for (let name of names) {
   const innerX = dx + BORDER
   const innerY = dy + BORDER
 
-  // clear border
   for (let i = 0; i < SLOT; i++) {
-    // top
     data.fill(0, (dy * canvas.width + dx + i) * 4, (dy * canvas.width + dx + i) * 4 + 4)
-    // bottom
     data.fill(0, ((dy + SLOT - 1) * canvas.width + dx + i) * 4, ((dy + SLOT - 1) * canvas.width + dx + i) * 4 + 4)
-    // left
     data.fill(0, ((dy + i) * canvas.width + dx) * 4, ((dy + i) * canvas.width + dx) * 4 + 4)
-    // right
     data.fill(0, ((dy + i) * canvas.width + dx + SLOT - 1) * 4, ((dy + i) * canvas.width + dx + SLOT - 1) * 4 + 4)
   }
 
-  // borders from inner pixels
   for (let y2 = 0; y2 < config.size; y2++) {
     const srcRow = ((innerY + y2) * canvas.width + innerX) * 4
     const dstRow = ((dy + BORDER + y2) * canvas.width) * 4
