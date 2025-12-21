@@ -1,7 +1,7 @@
 import fs from "fs"
 import { Canvas, loadImage } from "skia-canvas"
 
-const configName = "f8thful"
+const configName = "vanilla"
 
 const config = JSON.parse(fs.readFileSync(`config/${configName}.json`))
 
@@ -10,9 +10,9 @@ const m = config.size / 16
 const SLOT = 18 * m
 const BORDER = 1 * m
 
-const names = JSON.parse(fs.readFileSync(`config/mappings/${config.mapping}.json`, "utf8"))
-const tints = JSON.parse(fs.readFileSync(`config/tints/${config.tints}.json`, "utf8"))
-const leaves = JSON.parse(fs.readFileSync(`config/leaves/${config.leaves}.json`, "utf8"))
+const names = JSON.parse(fs.readFileSync(`config/mappings/${config.mapping ?? "vanilla"}.json`, "utf8"))
+const tints = JSON.parse(fs.readFileSync(`config/tints/${config.tints ?? "vanilla"}.json`, "utf8"))
+const leaves = JSON.parse(fs.readFileSync(`config/leaves/${config.leaves ?? "vanilla"}.json`, "utf8"))
 
 const baseImg = await loadImage("textures/base.png")
 
