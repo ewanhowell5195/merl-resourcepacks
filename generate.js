@@ -1,26 +1,20 @@
 import fs from "fs"
 import { Canvas, loadImage } from "skia-canvas"
 
-const sourceDir = "C:/Users/ewanh/AppData/Roaming/.minecraft/resourcepacks/1.21.10/assets/minecraft/textures"
-const mappingPath = "mappings/base.json"
-const tintsPath = "tints.json"
-const leavesPath = "leaves.json"
-const basePath = "textures/base.png"
-const outPath = "textures/vanilla.png"
+const configName = "vanilla"
 
-const BASE = 16
-const SIZE = 16
+const config = JSON.parse(fs.readFileSync(`config/${configName}.json`))
 
-const m = SIZE / BASE
+const m = config.size / 16
 
 const SLOT = 18 * m
 const BORDER = 1 * m
 
-const names = JSON.parse(await fs.promises.readFile(mappingPath, "utf8"))
-const tints = JSON.parse(await fs.promises.readFile(tintsPath, "utf8"))
-const leaves = JSON.parse(await fs.promises.readFile(leavesPath, "utf8"))
+const names = JSON.parse(fs.readFileSync(`config/mappings/${config.mapping}.json`, "utf8"))
+const tints = JSON.parse(fs.readFileSync(`config/tints/${config.tints}.json`, "utf8"))
+const leaves = JSON.parse(fs.readFileSync(`config/leaves/${config.leaves}.json`, "utf8"))
 
-const baseImg = await loadImage(basePath)
+const baseImg = await loadImage("textures/base.png")
 
 const canvas = new Canvas(baseImg.width * m, baseImg.height * m)
 const ctx = canvas.getContext("2d")
@@ -34,19 +28,19 @@ let x = 0
 let y = 0
 
 const debugImg = await loadImage("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABuUlEQVR42pXRwUuTARzG8Yf3Hyh1spBFobvYpZYngzLAyFvU685ZVBf1klRAuHU0Kkgg5k5Zl5oBCTJBRRVQAXUoKIpuorABe2FzRxF9eeT58QJehfHZ5fc+X15egLzcD0Cdr78GyrAZMaNmmxk3STo3D1hXQ9RnCLhFhu0iAnSQUbtrA5Jk3K6BI2gjTwD3fPnowl6/mTYZWHAezqvQtctQFXFfhTdWSFphzAp2XSH3gBq0N0UAL7flgC+/UU6aDNwxp52enyr0Z9lQQXKT1zykfV4H5q1g12VyywrZoPAhpY3P/+XvdbnsX9zeMMfNEedTUoXh7yqM/WXYw9oKI0VQzxTJVcAjM1YYDgrpd1oaH5Ibo5KL5tmS5C9zyHzvjD5XYbKPoQq2EiowRZTynJ1DocSzESskgCrZFxRmXO3t9Ei+Nb9k5cRXeTog+cLsdhY6VNh7rO9Al/DW+CqjwmBChT+vkSvztNveoSso7Mdstd3sTEm3V/a68kenPGmXvOsc3lCBLUQ1w9ZBlHOMuSgWeP8B8iU+iyHn8WMr/lV53BIUeIWy/qlsvCObmmVzk7zdKJ/Uy9rVc6GBZfJIb3EsAAAAAElFTkSuQmCC")
-const debug = new Canvas(SIZE, SIZE)
+const debug = new Canvas(config.size, config.size)
 const debugCtx = debug.getContext("2d")
 debugCtx.imageSmoothingEnabled = false
-debugCtx.drawImage(debugImg, 0, 0, SIZE, SIZE)
+debugCtx.drawImage(debugImg, 0, 0, config.size, config.size)
 
-const blank = new Canvas(SIZE, SIZE)
+const blank = new Canvas(config.size, config.size)
 
 for (let name of names) {
   let texturePath
   if (name.includes("/")) {
-    texturePath = `${sourceDir}/${name}.png`
+    texturePath = `${config.source}/${name}.png`
   } else {
-    texturePath = `${sourceDir}/block/${name}.png`
+    texturePath = `${config.source}/block/${name}.png`
   }
 
   if (name !== "debug" && !fs.existsSync(texturePath)) {
@@ -66,9 +60,8 @@ for (let name of names) {
   ) {
     img = blank
   } else if (name === "debug") {
-    img = blank
+    img = debug
   } else {
-    img = blank
     img = await loadImage(texturePath)
   }
 
@@ -77,8 +70,8 @@ for (let name of names) {
 
   ctx.clearRect(dx, dy, SLOT, SLOT)
 
-  const srcW = Math.min(img.width, SIZE)
-  const srcH = Math.min(img.height, SIZE)
+  const srcW = Math.min(img.width, config.size)
+  const srcH = Math.min(img.height, config.size)
 
   function drawImage(img) {
     ctx.drawImage(img, 0, 0, srcW, srcH, dx + BORDER, dy + BORDER, srcW, srcH)
@@ -87,12 +80,12 @@ for (let name of names) {
   drawImage(img)
 
   if (name === "open_eyeblossom") {
-    if (fs.existsSync(`${sourceDir}/block/open_eyeblossom_emissive.png`)) {
-      drawImage(await loadImage(`${sourceDir}/block/open_eyeblossom_emissive.png`))
+    if (fs.existsSync(`${config.source}/block/open_eyeblossom_emissive.png`)) {
+      drawImage(await loadImage(`${config.source}/block/open_eyeblossom_emissive.png`))
     }
   } else if (name === "firefly_bush") {
-    if (fs.existsSync(`${sourceDir}/block/firefly_bush_emissive.png`)) {
-      drawImage(await loadImage(`${sourceDir}/block/firefly_bush_emissive.png`))
+    if (fs.existsSync(`${config.source}/block/firefly_bush_emissive.png`)) {
+      drawImage(await loadImage(`${config.source}/block/firefly_bush_emissive.png`))
     }
   }
 
@@ -159,8 +152,8 @@ for (let name of names) {
 
 ctx.drawImage(canvas, 18 * 38 * m, 0 * m, 18 * m, 18 * m, 18 * 3 * m, 0 * m, 18 * m, 18 * m)
 
-if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
-  const img = await loadImage(`${sourceDir}/entity/chest/normal.png`)
+if (fs.existsSync(`${config.source}/entity/chest/normal.png`)) {
+  const img = await loadImage(`${config.source}/entity/chest/normal.png`)
   const canvas2 = new Canvas(img.width, img.height)
   const ctx2 = canvas2.getContext("2d")
   ctx2.save()
@@ -185,8 +178,8 @@ if (fs.existsSync(`${sourceDir}/entity/chest/normal.png`)) {
   ctx.drawImage(canvas2, 1 * m, 63 * m, 2 * m, 1 * m, (18 * 31 + 4) * m, (18 * 7 + 1) * m, 2 * m, 1 * m)
 }
 
-if (fs.existsSync(`${sourceDir}/entity/chest/ender.png`)) {
-  const img = await loadImage(`${sourceDir}/entity/chest/ender.png`)
+if (fs.existsSync(`${config.source}/entity/chest/ender.png`)) {
+  const img = await loadImage(`${config.source}/entity/chest/ender.png`)
   const canvas2 = new Canvas(img.width, img.height)
   const ctx2 = canvas2.getContext("2d")
   ctx2.save()
@@ -238,46 +231,46 @@ for (let name of names) {
   }
 
   // borders from inner pixels
-  for (let y2 = 0; y2 < SIZE; y2++) {
+  for (let y2 = 0; y2 < config.size; y2++) {
     const srcRow = ((innerY + y2) * canvas.width + innerX) * 4
     const dstRow = ((dy + BORDER + y2) * canvas.width) * 4
 
     const left = data.subarray(srcRow, srcRow + 4)
-    const right = data.subarray(srcRow + (SIZE - 1) * 4, srcRow + SIZE * 4)
+    const right = data.subarray(srcRow + (config.size - 1) * 4, srcRow + config.size * 4)
 
     for (let b = 0; b < BORDER; b++) {
       data.set(left, dstRow + (dx + b) * 4)
-      data.set(right, dstRow + (dx + BORDER + SIZE + b) * 4)
+      data.set(right, dstRow + (dx + BORDER + config.size + b) * 4)
     }
   }
 
-  for (let x2 = 0; x2 < SIZE; x2++) {
+  for (let x2 = 0; x2 < config.size; x2++) {
     const top = data.subarray(
       ((innerY) * canvas.width + innerX + x2) * 4,
       ((innerY) * canvas.width + innerX + x2) * 4 + 4
     )
     const bottom = data.subarray(
-      ((innerY + SIZE - 1) * canvas.width + innerX + x2) * 4,
-      ((innerY + SIZE - 1) * canvas.width + innerX + x2) * 4 + 4
+      ((innerY + config.size - 1) * canvas.width + innerX + x2) * 4,
+      ((innerY + config.size - 1) * canvas.width + innerX + x2) * 4 + 4
     )
 
     for (let b = 0; b < BORDER; b++) {
       data.set(top, ((dy + b) * canvas.width + dx + BORDER + x2) * 4)
-      data.set(bottom, ((dy + BORDER + SIZE + b) * canvas.width + dx + BORDER + x2) * 4)
+      data.set(bottom, ((dy + BORDER + config.size + b) * canvas.width + dx + BORDER + x2) * 4)
     }
   }
 
   const tl = data.subarray(((innerY) * canvas.width + innerX) * 4, ((innerY) * canvas.width + innerX) * 4 + 4)
-  const tr = data.subarray(((innerY) * canvas.width + innerX + SIZE - 1) * 4, ((innerY) * canvas.width + innerX + SIZE - 1) * 4 + 4)
-  const bl = data.subarray(((innerY + SIZE - 1) * canvas.width + innerX) * 4, ((innerY + SIZE - 1) * canvas.width + innerX) * 4 + 4)
-  const br = data.subarray(((innerY + SIZE - 1) * canvas.width + innerX + SIZE - 1) * 4, ((innerY + SIZE - 1) * canvas.width + innerX + SIZE - 1) * 4 + 4)
+  const tr = data.subarray(((innerY) * canvas.width + innerX + config.size - 1) * 4, ((innerY) * canvas.width + innerX + config.size - 1) * 4 + 4)
+  const bl = data.subarray(((innerY + config.size - 1) * canvas.width + innerX) * 4, ((innerY + config.size - 1) * canvas.width + innerX) * 4 + 4)
+  const br = data.subarray(((innerY + config.size - 1) * canvas.width + innerX + config.size - 1) * 4, ((innerY + config.size - 1) * canvas.width + innerX + config.size - 1) * 4 + 4)
 
   for (let by = 0; by < BORDER; by++) {
     for (let bx = 0; bx < BORDER; bx++) {
       data.set(tl, ((dy + by) * canvas.width + dx + bx) * 4)
-      data.set(tr, ((dy + by) * canvas.width + dx + BORDER + SIZE + bx) * 4)
-      data.set(bl, ((dy + BORDER + SIZE + by) * canvas.width + dx + bx) * 4)
-      data.set(br, ((dy + BORDER + SIZE + by) * canvas.width + dx + BORDER + SIZE + bx) * 4)
+      data.set(tr, ((dy + by) * canvas.width + dx + BORDER + config.size + bx) * 4)
+      data.set(bl, ((dy + BORDER + config.size + by) * canvas.width + dx + bx) * 4)
+      data.set(br, ((dy + BORDER + config.size + by) * canvas.width + dx + BORDER + config.size + bx) * 4)
     }
   }
 
@@ -290,4 +283,4 @@ for (let name of names) {
 
 ctx.putImageData(full, 0, 0)
 
-await canvas.toFile(outPath)
+await canvas.toFile(`textures/${configName}.png`)
