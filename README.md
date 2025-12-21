@@ -15,6 +15,11 @@ Resource Packs and Skins for Merl
 https://help.minecraft.net/hc/en-us?textures=vanilla&skin=alex
 ```
 
+## Bonus features
+- Adds fullscreen support for Merl.
+- Adds a camera unlock toggle so you can move the camera around.
+- Controls live in the top-right of the viewport.
+
 ## Resource packs
 ### How to use
 Add a `textures` query param when you open Merl:
