@@ -47,9 +47,9 @@ https://help.minecraft.net/hc/en-us?textures=https://example.com/merl-pack-atlas
 {
   "source": "C:/path/to/pack/assets/minecraft/textures", // The textures folder to use
   "size": 16, // The texture size. For packs below 16x, keep as 16
-  "mapping": "vanilla", // the mapping size to use (optional, defaults to "vanilla")
+  "mapping": "vanilla", // the mappings to use (optional, defaults to "vanilla")
   "tints": "vanilla", // the tints to use (optional, defaults to "vanilla")
-  "leaves": "vanilla" // the leave handling to use (optional, defaults to "vanilla")
+  "leaves": "vanilla" // the leaf handling to use (optional, defaults to "vanilla")
 }
 ```
 
@@ -59,8 +59,8 @@ Mappings map the atlas to textures in your pack. It is a list of textures in the
 [
   "grass_block_top",
   "stone",
-  "dirt",
-  ...
+  "dirt"
+  // ...more entries
 ]
 ```
 
@@ -69,18 +69,18 @@ Tints tell the generator what colours to tint specific textures.
 // config/tints/my_pack.json
 {
   "grass_block_top": "#7fb238",
-  "oak_leaves": "#7fb238",
-  ...
+  "oak_leaves": "#7fb238"
+  // ...more entries
 }
 ```
 
 Leaves tell the generator what textures to apply the leaf rendering to. Generates accurate "Fast Leaves" textures.
 ```js
-// config/leaves/vanilla.json
+// config/leaves/my_pack.json
 [
   "oak_leaves",
-  "birch_leaves",
-  ...
+  "birch_leaves"
+  // ...more entries
 ]
 ```
 3. Open `generate.js` and set `configName` to the name of the config JSON file that you made.
