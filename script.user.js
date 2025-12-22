@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Merl Resource Packs
 // @namespace    https://github.com/ewanhowell5195/merl-resourcepacks
-// @version      1.0.0
+// @version      1.0.1
 // @description  Resource Packs and Skins for Merl
 // @author       Ewan Howell
 // @match        https://help.minecraft.net/*
@@ -393,7 +393,7 @@
 
     const resetButton = document.createElement("div")
 
-    resetButton.id = "ewan-unlock-toggle"
+    resetButton.id = "ewan-reset-button"
     resetButton.innerHTML = target.outerHTML
     resetButton.dataset.tooltip = "Reset camera"
 
@@ -415,6 +415,12 @@
   observer.observe(document.documentElement, {
     childList: true,
     subtree: true
+  })
+
+  document.addEventListener("click", e => {
+    const target = e.target.closest('[aria-label="See visualization"]')
+    if (!target) return
+    document.querySelector("#ewan-unlock-toggle").classList.remove("active")
   })
 
   const tooltipScript = document.createElement("script")
