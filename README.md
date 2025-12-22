@@ -11,9 +11,7 @@ Resource Packs and Skins for Merl
 3. Visit https://help.minecraft.net/hc/en-us and open Merl.
 4. Optional: append query params to select a texture or skin, for example:
 
-```
 https://help.minecraft.net/hc/en-us?textures=vanilla&skin=alex
-```
 
 ## Bonus features
 - Adds fullscreen support for Merl.
