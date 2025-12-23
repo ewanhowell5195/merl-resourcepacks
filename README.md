@@ -3,6 +3,8 @@
 
 Resource Packs and Skins for Merl
 
+[![Youtube Video](https://github.com/user-attachments/assets/4e5b94ed-3983-4e73-aa63-ab55b5f28425)](https://www.youtube.com/watch?v=r_KtdycNjmk)
+
 ![Screenshot of Merl using the Dokucraft resource pack and the Alex skin.](https://raw.githubusercontent.com/ewanhowell5195/merl-resourcepacks/master/screenshot.png)
 
 ## How to use
